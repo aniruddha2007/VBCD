@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>聯絡人搜尋結果</title>
+
+    <!-- Add the Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+
+  <body class="bg-light">
+    <div class="container">
+      <h1 class="text-center mt-4">聯絡人"{{ query }}"的搜尋結果</h1>
+      <nav class="text-center mt-4">
+        <ul class="list-inline">
+          <li class="list-inline-item">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">首頁</a>
+          </li>
+          <li class="list-inline-item">
+            <a href="{{ url_for('search') }}" class="btn btn-secondary">搜尋</a>
+          </li>
+          <li class="list-inline-item">
+            <a href="{{ url_for('upload') }}" class="btn btn-secondary">上傳</a>
+          </li>
+          <li class="list-inline-item">
+            <a
+              href="{{ url_for('select_contact_to_edit') }}"
+              class="btn btn-secondary"
+              >修改</a
+            >
+          </li>
+          <li class="list-inline-item">
+            <a
+              href="{{ url_for('select_contact_to_delete') }}"
+              class="btn btn-secondary"
+              >刪除</a
+            >
+          </li>
+        </ul>
+      </nav>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead class="thead-light">
+            <tr>
+              <th>名字</th>
+              <th>姓氏</th>
+              <th>電子郵件</th>
+              <th>電子郵件二</th>
+              <th>辦公電話</th>
+              <th>手機</th>
+              <th>其他電話</th>
+              <th>主要電話</th>
+              <th>商務傳真</th>
+              <th>職位</th>
+              <th>公司名</th>
+              <th>地址</th>
+              <th>城市</th>
+              <th>州</th>
+              <th>郵遞區號</th>
+              <th>國家</th>
+              <th>個人網站</th>
+              <th>網站</th>
+              <th>生日</th>
+              <th>註釋</th>
+              <th>標籤</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for contact in contacts %}
+            <tr>
+              <td>{{ contact.first_name }}</td>
+              <td>{{ contact.last_name }}</td>
+              <td>{{ contact.email_address }}</td>
+              <td>{{ contact.email_address_2 }}</td>
+              <td>{{ contact.business_phone }}</td>
+              <td>{{ contact.mobile_phone }}</td>
+              <td>{{ contact.other_phone }}</td>
+              <td>{{ contact.primary_phone }}</td>
+              <td>{{ contact.business_fax }}</td>
+              <td>{{ contact.job_title }}</td>
+              <td>{{ contact.company }}</td>
+              <td>{{ contact.business_address }}</td>
+              <td>{{ contact.business_city }}</td>
+              <td>{{ contact.business_state }}</td>
+              <td>{{ contact.business_zip }}</td>
+              <td>{{ contact.business_country }}</td>
+              <td>{{ contact.personal_website }}</td>
+              <td>{{ contact.web_page }}</td>
+              <td>{{ contact.birthday }}</td>
+              <td>{{ contact.notes }}</td>
+              <td>{{ contact.tag }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Add the Bootstrap and jQuery scripts at the end of the body -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+<!-- layout.html -->
+
+<div class="container">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- ... (other navigation items) -->
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('set_locale', lang='en') }}"
+            >English</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('set_locale', lang='zh') }}"
+            >中文</a
+          >
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  {% block content %}{% endblock %}
+</div>

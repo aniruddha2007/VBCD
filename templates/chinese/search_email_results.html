@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>電子郵件搜尋結果</title>
+
+    <!-- Add the Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link rel="manifest" href="/manifest.json" />
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      tr:hover {
+        background-color: #d1d1d1;
+      }
+
+      nav {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      li {
+        display: inline-block;
+        margin-right: 10px;
+      }
+
+      a {
+        text-decoration: none;
+        color: #333;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      a:hover {
+        background-color: #ddd;
+      }
+    </style>
+  </head>
+
+  <body class="bg-light">
+    <nav class="text-center mt-4">
+      <ul class="list-inline">
+        <li class="list-inline-item">
+          <a href="{{ url_for('index') }}" class="btn btn-secondary">首頁</a>
+        </li>
+        <li class="list-inline-item">
+          <a href="{{ url_for('search') }}" class="btn btn-secondary">搜尋</a>
+        </li>
+        <li class="list-inline-item">
+          <a href="{{ url_for('upload') }}" class="btn btn-secondary">上傳</a>
+        </li>
+        <li class="list-inline-item">
+          <a
+            href="{{ url_for('select_contact_to_edit') }}"
+            class="btn btn-secondary"
+            >修改</a
+          >
+        </li>
+        <li class="list-inline-item">
+          <a
+            href="{{ url_for('select_contact_to_delete') }}"
+            class="btn btn-secondary"
+            >刪除</a
+          >
+        </li>
+      </ul>
+    </nav>
+    <div class="container">
+      <h1 class="text-center">聯絡人"{{ query }}"的搜尋結果</h1>
+      <table class="table">
+        <thead class="thead-light">
+          <tr>
+            <th>電子郵件</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for contact in contacts %}
+          <tr>
+            <td>{{ contact.email_address }}</td>
+            <td>{{ contact.email_address_2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Add the Bootstrap and jQuery scripts at the end of the body -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  </body>
+</html>

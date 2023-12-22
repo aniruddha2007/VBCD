@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>選擇要刪除的聯絡人</title>
+
+    <!-- Add the Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+
+  <body class="bg-light">
+    <div class="container">
+      <h1 class="text-center mt-4">選擇要刪除的聯絡人</h1>
+      <nav class="text-center my-4">
+        <ul class="list-inline">
+          <li class="list-inline-item">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">首頁</a>
+          </li>
+          <li class="list-inline-item">
+            <a href="{{ url_for('upload') }}" class="btn btn-secondary">上傳</a>
+          </li>
+          <li class="list-inline-item">
+            <a href="{{ url_for('search_email') }}" class="btn btn-secondary"
+              >電子郵件搜尋</a
+            >
+          </li>
+          <li class="list-inline-item">
+            <a
+              href="{{ url_for('select_contact_to_edit') }}"
+              class="btn btn-secondary"
+              >修改</a
+            >
+          </li>
+          <li class="list-inline-item">
+            <a
+              href="{{ url_for('select_contact_to_delete') }}"
+              class="btn btn-secondary"
+              >刪除</a
+            >
+          </li>
+        </ul>
+      </nav>
+      <form method="post" class="mx-auto" style="max-width: 400px">
+        <div class="form-group">
+          <label for="contact_id">選擇聯絡人:</label>
+          <select
+            class="form-control"
+            name="contact_id"
+            id="contact_id"
+            required
+          >
+            {% for contact in contacts %}
+            <option value="{{ contact.id }}">
+              {{ contact.first_name }} {{ contact.last_name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-success btn-block">
+          刪除選擇的聯絡人
+        </button>
+      </form>
+    </div>
+
+    <!-- Add the Bootstrap and jQuery scripts at the end of the body -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  </body>
+</html>

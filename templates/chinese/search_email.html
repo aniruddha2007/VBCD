@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>電子郵件搜尋</title>
+
+    <!-- Add the Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+
+  <body class="bg-light">
+    <div class="container">
+      <h1 class="text-center mt-4">聯絡人列表</h1>
+      <nav class="text-center mt-4">
+        <ul class="list-inline">
+          <li class="list-inline-item">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">首頁</a>
+          </li>
+          <li class="list-inline-item">
+            <a href="{{ url_for('search') }}" class="btn btn-secondary">搜尋</a>
+          </li>
+          <li class="list-inline-item">
+            <a href="{{ url_for('upload') }}" class="btn btn-secondary">上傳</a>
+          </li>
+          <li class="list-inline-item">
+            <a
+              href="{{ url_for('select_contact_to_edit') }}"
+              class="btn btn-secondary"
+              >修改</a
+            >
+          </li>
+          <li class="list-inline-item">
+            <a
+              href="{{ url_for('select_contact_to_delete') }}"
+              class="btn btn-secondary"
+              >刪除</a
+            >
+          </li>
+        </ul>
+      </nav>
+      <form method="post" action="{{ url_for('search_email') }}" class="mb-4">
+        <label for="query">搜尋:</label>
+        <input
+          type="text"
+          name="query"
+          id="query"
+          class="form-control"
+          required
+        />
+        <button type="submit" class="btn btn-success mt-2">搜尋</button>
+        <p class="note-zh">
+          注意：只能使用這些搜尋字詞 - 名字、姓氏、
+          電子郵件、商務電話、職務、公司、公司所在國家/地區、備註和
+          標籤。只電子郵件將作為結果提供。
+        </p>
+      </form>
+    </div>
+
+    <!-- Add the Bootstrap and jQuery scripts at the end of the body -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  </body>
+</html>
