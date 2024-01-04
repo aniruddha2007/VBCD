@@ -1,3 +1,4 @@
+#imports
 import csv
 from flask import request, session, redirect, url_for, flash
 from functools import wraps
@@ -8,7 +9,11 @@ from modules.contacts import Contact, db
 from io import BytesIO
 import sqlite3
 
-
+# The `csv_to_db_mapping` dictionary is a mapping of CSV headers to database columns. It is used to
+# map the headers of a CSV file to the corresponding columns in the database table when loading data
+# from the CSV file into the database. Each key in the dictionary represents a CSV header, and the
+# corresponding value represents the corresponding database column. This mapping allows for
+# flexibility in handling CSV files with different header names or structures.
 # mapping of CSV headers to database columns
 csv_to_db_mapping = {
     "First Name": "first_name",
@@ -33,6 +38,11 @@ csv_to_db_mapping = {
     "Notes": "notes",
 }
 
+# The `csv_to_db_mapping_zh` dictionary is a mapping of Chinese CSV headers to database columns. It is
+# used when loading data from a CSV file with Chinese headers into the database. Each key in the
+# dictionary represents a Chinese CSV header, and the corresponding value represents the corresponding
+# database column. This mapping allows for handling CSV files with Chinese headers and mapping them to
+# the correct columns in the database table.
 # mapping of CSV headers to database columns
 csv_to_db_mapping_zh = {
     "名字": "first_name",
@@ -62,6 +72,16 @@ csv_to_db_mapping_zh = {
 
 
 def load_csv_to_db(csv_file, use_chinese_mapping=False):
+    """
+    The function `load_csv_to_db` loads data from a CSV file into a database, mapping the CSV columns to
+    the appropriate fields in the Contact class and filtering out any invalid keys.
+    
+    :param csv_file: The csv_file parameter is the file object of the CSV file that you want to load
+    into the database
+    :param use_chinese_mapping: A boolean parameter that determines whether to use a Chinese mapping for
+    the CSV file. If set to True, the function will use the `csv_to_db_mapping_zh` mapping. If set to
+    False (default), it will use the `csv_to_db_mapping` mapping, defaults to False (optional)
+    """
     csv_reader = csv.DictReader(csv_file)
 
     # Extract tag from the file name (modify this part according to your needs)
@@ -91,6 +111,17 @@ def load_csv_to_db(csv_file, use_chinese_mapping=False):
 
 
 # Function to detect and convert encoding
+    """
+    The function detects the encoding of a given content and converts it to UTF-8 if it is not already
+    in that encoding.
+    
+    :param content: The `content` parameter is the text or data that you want to detect and convert the
+    encoding for. It can be a string or bytes object
+    :return: the content after detecting and converting the encoding to UTF-8. If the detected encoding
+    is already UTF-8, the content is returned as is. If the detected encoding is not UTF-8, the content
+    is decoded using the detected encoding and then re-encoded as UTF-8 before being returned. If there
+    is an error during the conversion, None is returned.
+    """
 def detect_and_convert_encoding(content):
     result = chardet.detect(content)
     detected_encoding = result["encoding"]
@@ -108,6 +139,16 @@ def detect_and_convert_encoding(content):
         return content
 
 
+    """
+    The `load_csv` function checks the encoding of a CSV file and converts it to UTF-8 if necessary,
+    returning the content of the file.
+    
+    :param file: The "file" parameter is the file object that represents the uploaded CSV file. It is
+    used to read the content of the file and check its encoding
+    :return: the content of the CSV file. If the file is already in UTF-8 encoding, it returns the
+    content as is. If the file is not in UTF-8 encoding, it converts the content to UTF-8 and then
+    returns it.
+    """
 def load_csv(file):
     # Check the encoding of the uploaded CSV file
     detected_encoding = check_csv_encoding(file)
@@ -125,6 +166,15 @@ def load_csv(file):
 
 
 def check_csv_encoding(file):
+    """
+    The function `check_csv_encoding` reads a portion of a CSV file to detect its encoding using the
+    `chardet` library, and then tries to decode the content using the detected encoding, falling back to
+    UTF-8 if decoding fails.
+    
+    :param file: The `file` parameter is a file object that represents the CSV file you want to check
+    the encoding for
+    :return: the detected encoding of the CSV file.
+    """
     # Reset the file position to the beginning
     file.seek(0)
 
@@ -151,6 +201,18 @@ def check_csv_encoding(file):
 
 
 def convert_to_utf8(file, detected_encoding):
+    """
+    The function `convert_to_utf8` takes a file and a detected encoding as input, reads the content of
+    the file using the detected encoding, handles any decoding errors, and returns the content as a
+    BytesIO object encoded in UTF-8.
+    
+    :param file: The `file` parameter is the file object that you want to convert to UTF-8 encoding. It
+    should be opened in binary mode (`"rb"`)
+    :param detected_encoding: The parameter "detected_encoding" is the encoding that was detected for
+    the file content. It is the encoding that was used to read the content of the file before the
+    conversion to UTF-8
+    :return: a BytesIO object containing the content of the file encoded in UTF-8.
+    """
     # Reset the file position to the beginning
     file.seek(0)
 
@@ -170,6 +232,17 @@ def convert_to_utf8(file, detected_encoding):
 
 
 # DO NOT EDIT THIS FUNCTION
+    """
+    The function `load_csv_to_db_DO_NOT_EDIT` loads data from a CSV file into a database, using a
+    mapping to convert the CSV columns to database fields, and logs any errors encountered during the
+    process.
+    
+    :param csv_file: The `csv_file` parameter is the file object of the CSV file that you want to load
+    into the database. It should be opened in read mode and passed as an argument to the function
+    :param use_chinese_mapping: A boolean parameter that determines whether to use a Chinese mapping for
+    the CSV file. If set to True, the function will use the `csv_to_db_mapping_zh` mapping. If set to
+    False, it will use the `csv_to_db_mapping` mapping, defaults to False (optional)
+    """
 def load_csv_to_db_DO_NOT_EDIT(csv_file, use_chinese_mapping=False):
     # Set up basic logging configuration
     logging.basicConfig(level=logging.DEBUG)
@@ -206,6 +279,9 @@ def load_csv_to_db_DO_NOT_EDIT(csv_file, use_chinese_mapping=False):
 
 
 # initializing the database for login and register
+    """
+    The function initializes a SQLite database for login and register functionality.
+    """
 def init_db():
     with sqlite3.connect("login.db") as connection:
         cursor = connection.cursor()
@@ -222,6 +298,14 @@ def init_db():
 
 
 # login required function
+    """
+    The `login_required` function is a decorator that checks if a user is logged in before allowing
+    access to a view function, and redirects to the login page if not.
+    
+    :param view: The `view` parameter is a function that represents the view or endpoint that requires
+    login. It is the function that will be executed if the user is logged in
+    :return: The function `wrapped_view` is being returned.
+    """
 def login_required(view):
     @wraps(view)
     def wrapped_view(*args, **kwargs):

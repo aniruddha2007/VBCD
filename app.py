@@ -1,3 +1,4 @@
+#imports
 from flask import (
     Flask,
     render_template,
@@ -6,6 +7,7 @@ from flask import (
     url_for,
     send_file,
     session,
+    jsonify,
     flash,
 )
 from modules.functions import (
@@ -20,10 +22,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel, _
 from modules.contacts import Contact, db
-from io import TextIOWrapper, BytesIO
+from io import TextIOWrapper, BytesIO, StringIO
 import csv
 import sqlite3
 
+# The above code is initializing a Flask app and configuring the database connection.
 # Initialize the Flask app
 app = Flask(__name__, static_folder="static", static_url_path="")
 babel = Babel(app)
@@ -37,10 +40,19 @@ db.init_app(app)
 
 
 def select_language():
+    """
+    The function returns the value of the "select_language" configuration variable.
+    :return: the value of the "select_language" key in the app.config dictionary.
+    """
     return app.config["select_language"]
 
 
 # Homepage route to display the database
+    """
+    The index function is a route in a Python Flask application that displays the database records based
+    on the selected filters.
+    :return: the rendered template "index.html" with the contacts variable passed as an argument.
+    """
 @app.route("/")
 @login_required
 def index():
@@ -60,7 +72,13 @@ def index():
     """
 
 
+
 # Upload route for handling CSV file upload
+    """
+    The `upload` function is a route in a Python Flask application that handles the uploading of a CSV
+    file, processes it, and saves the data to a database.
+    :return: the rendered template for the upload page.
+    """
 @app.route("/upload", methods=["GET", "POST"])
 @login_required
 def upload():
@@ -86,6 +104,11 @@ def upload():
 
 
 # Upload route for handling CSV file upload
+    """
+    The function `upload_convert_csv` handles the upload of a CSV file, converts it to UTF-8 format, and
+    provides it as a downloadable file.
+    :return: a downloadable CSV file.
+    """
 @app.route("/upload_convert_csv", methods=["GET", "POST"])
 @login_required
 def upload_convert_csv():
@@ -110,6 +133,12 @@ def upload_convert_csv():
 
 
 # Search route for searching the database
+    """
+    The `search` function in this Python code is used to perform a search query on a database based on
+    user input and display the search results.
+    :return: a rendered template for the search results page, passing the contacts and query as
+    variables to be used in the template.
+    """
 @app.route("/search", methods=["GET", "POST"])
 @login_required
 def search():
@@ -129,6 +158,7 @@ def search():
             | (Contact.business_country.like(f"%{query}%"))
             | (Contact.notes.like(f"%{query}%"))
             | (Contact.tag.like(f"%{query}%"))
+            | (Contact.meet_date.like(f"%{query}%"))
         ).all()
         return render_template(
             f"{selected_language}/search_results.html", contacts=contacts, query=query
@@ -137,6 +167,12 @@ def search():
 
 
 # Search only email results
+    """
+    The `search_email` function in this Python code performs a search query on a database for contacts
+    based on an input query, and returns the results in a template.
+    :return: a rendered template, either "search_email_results.html" or "search_email.html", depending
+    on the request method.
+    """
 @app.route("/search_email", methods=["GET", "POST"])
 @login_required
 def search_email():
@@ -156,6 +192,7 @@ def search_email():
             | (Contact.business_country.like(f"%{query}%"))
             | (Contact.notes.like(f"%{query}%"))
             | (Contact.tag.like(f"%{query}%"))
+            | (Contact.meet_date.like(f"%{query}%"))
         ).all()
         return render_template(
             f"{selected_language}/search_email_results.html",
@@ -166,6 +203,15 @@ def search_email():
 
 
 # edit contact
+    """
+    The `edit` function in this Python code is used to edit a contact's information and update it in the
+    database.
+    
+    :param contact_id: The `contact_id` parameter is the unique identifier of the contact that needs to
+    be edited. It is used to retrieve the contact from the database and display its current data in the
+    edit form
+    :return: the rendered template "edit.html" with the contact data and headers as arguments.
+    """
 @app.route("/edit/<int:contact_id>", methods=["GET", "POST"])
 @login_required
 def edit(contact_id):
@@ -182,8 +228,6 @@ def edit(contact_id):
         "E-mail 2 Address": "email_address_2",
         "Business Phone": "business_phone",
         "Mobile Phone": "mobile_phone",
-        "Other Phone": "other_phone",
-        "Primary Phone": "primary_phone",
         "Business Fax": "business_fax",
         "Job Title": "job_title",
         "Company": "company",
@@ -192,7 +236,7 @@ def edit(contact_id):
         "Business State": "business_state",
         "Business Postal Code": "business_zip",
         "Business Country/Region": "business_country",
-        "Personal Web Page": "personal_website",
+        "Meet Date": "meet_date",
         "Web Page": "web_page",
         "Birthday": "birthday",
         "Notes": "notes",
@@ -206,8 +250,6 @@ def edit(contact_id):
         "E-mail 2 Address": "email_address_2",
         "Business Phone": "business_phone",
         "Mobile Phone": "mobile_phone",
-        "Other Phone": "other_phone",
-        "Primary Phone": "primary_phone",
         "Business Fax": "business_fax",
         "Job Title": "job_title",
         "Company": "company",
@@ -216,7 +258,7 @@ def edit(contact_id):
         "Business State": "business_state",
         "Business Postal Code": "business_zip",
         "Business Country/Region": "business_country",
-        "Personal Web Page": "personal_website",
+        "Meet Date": "meet_date",
         "Web Page": "web_page",
         "Birthday": "birthday",
         "Notes": "notes",
@@ -240,6 +282,13 @@ def edit(contact_id):
 
 
 # delete contact
+    """
+    This function deletes a contact from the database and redirects to the home page.
+    
+    :param contact_id: The `contact_id` parameter is the unique identifier of the contact that needs to
+    be deleted. It is used to retrieve the contact from the database and perform the deletion operation
+    :return: a rendered template for the delete.html file, passing the contact object as a parameter.
+    """
 @app.route("/delete/<int:contact_id>", methods=["GET", "POST"])
 @login_required
 def delete(contact_id):
@@ -254,8 +303,45 @@ def delete(contact_id):
 
     return render_template(f"{selected_language}/delete.html", contact=contact)
 
+# Route for deleting selected contacts
+    """
+    The `delete_selected_contacts` function deletes the contacts with the specified IDs from the
+    database and returns a JSON response indicating the success or failure of the operation.
+    :return: The route is returning a JSON response. If the deletion is successful, it returns a JSON
+    object with the keys 'success' set to True and 'message' set to 'Contacts deleted successfully'. If
+    there is an error during the deletion process, it returns a JSON object with the keys 'message' set
+    to 'Error deleting contacts', 'success' set to False, and 'error' set to
+    """
+@app.route('/delete_selected', methods=['POST'])
+def delete_selected_contacts():
+    try:
+        data = request.get_json()
+        contact_ids = data.get('contactIds', [])
+        
+        # Delete contacts from the database
+        for contact_id in contact_ids:
+            contact = Contact.query.get(contact_id)
+            print("Contact IDs to delete:", contact_ids)
+            if contact:
+                db.session.delete(contact)
+            else:
+                print(f"Contact ID {contact_id} not found")
+        
+        # Commit the changes to the database
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Contacts deleted successfully'})
+    except Exception as e:
+        print(f"Error deleting:{str(e)}")
+        return jsonify({'message':'Error deleting contacts', 'success': False, 'error': str(e)})
 
 # Add this route to your Flask app
+    """
+    This function is a route in a Flask app that allows the user to select a contact to edit and
+    redirects them to the edit page for that contact.
+    :return: the rendered template "select_contact_to_edit.html" with the contacts passed as a
+    parameter.
+    """
 @app.route("/select_contact_to_edit", methods=["GET", "POST"])
 @login_required
 def select_contact_to_edit():
@@ -274,6 +360,12 @@ def select_contact_to_edit():
 
 
 # delete route
+    """
+    The `select_contact_to_delete` function is a route in a Flask application that allows the user to
+    select a contact to delete and redirects them to the delete page for that contact.
+    :return: the rendered template "select_contact_to_delete.html" with the contacts passed as a
+    parameter.
+    """
 @app.route("/select_contact_to_delete", methods=["GET", "POST"])
 @login_required
 def select_contact_to_delete():
@@ -292,6 +384,11 @@ def select_contact_to_delete():
 
 
 # langauge select route
+    """
+    The `change_language` function changes the current language setting of the app to either "chinese"
+    or "english" and redirects the user back to the previous page.
+    :return: a redirect to the previous page (request.referrer).
+    """
 @app.route("/change_language")
 def change_language():
     current_language = app.config["select_language"]
@@ -301,12 +398,22 @@ def change_language():
 
 
 # get current language
+    """
+    The above function returns the current language selected in the application.
+    :return: The current language selected by the user.
+    """
 @app.route("/get_language")
 def get_language():
     return app.config["select_language"]
 
 
 # login route
+    """
+    The `login` function is a route in a Python Flask application that handles user login functionality,
+    including checking the username and password against a SQLite database and storing the username in a
+    session if the login is successful.
+    :return: the rendered template for the login page.
+    """
 @app.route("/login", methods=["GET", "POST"])
 def login():
     selected_language = select_language()
@@ -332,6 +439,11 @@ def login():
 
 
 # logout route
+    """
+    The above function is a logout route that removes the "username" key from the session, displays a
+    flash message, and redirects the user to the login page.
+    :return: a redirect to the "login" route.
+    """
 @app.route("/logout")
 def logout():
     session.pop("username", None)
@@ -340,6 +452,11 @@ def logout():
 
 
 # register route
+    """
+    The `register` function handles the registration process, including checking the secret password,
+    inserting the user into the database, and displaying the registration form.
+    :return: the rendered template for the register page.
+    """
 @app.route("/register", methods=["GET", "POST"])
 def register():
     selected_language = select_language()
@@ -368,10 +485,31 @@ def register():
 
     return render_template(f"{selected_language}/register.html")
 
+# Route for deleting a contact
+    """
+    This function deletes a contact from the database based on the provided contact_id.
+    
+    :param contact_id: The contact_id parameter is the unique identifier of the contact that needs to be
+    deleted. It is passed as a parameter in the URL route
+    :return: The route is returning a JSON response with a message indicating that the contact has been
+    deleted successfully.
+    """
+@app.route('/delete_contact/<int:contact_id>', methods=['DELETE'])
+@login_required
+def delete_contact(contact_id):
+    contact = Contact.query.get_or_404(contact_id)
+    db.session.delete(contact)
+    db.session.commit()
+    return jsonify({'message': 'Contact deleted successfully'})
 
+# The above code is running a Flask app. It first initializes the database by calling the `init_db()`
+# function. Then, it creates all the necessary database tables using the `db.create_all()` method
+# within a Flask application context. Finally, it runs the Flask app with debugging enabled
+# (`debug=True`), allowing for error messages to be displayed, and sets the host to "0.0.0.0" and the
+# port to 5000.
 # Run the Flask app
 if __name__ == "__main__":
     init_db()
     with app.app_context():
         db.create_all()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=False, host="0.0.0.0", port=5000)

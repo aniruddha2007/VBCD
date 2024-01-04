@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+  <head class="bg-light">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Your App Title">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
     <title>Contact Search Results</title>
 
     <!-- Add the Bootstrap CSS link -->
@@ -10,6 +15,32 @@
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
     />
+    <style>
+      #index-table {
+        table-layout: auto; /* Allow columns to adjust based on content */
+      }
+
+      #index-table th,
+      #index-table td {
+        overflow: hidden; /* Hide content that overflows the cell */
+        text-overflow: ellipsis; /* Add ellipsis (...) for overflowed content */
+        white-space: nowrap; /* Prevent text from wrapping to the next line */
+      }
+
+      #index-table th.sortable {
+        cursor: pointer;
+      }
+
+      #index-table th,
+      #index-table td {
+        padding: 8px; /* Add padding for better spacing */
+      }
+
+      #index-table td input {
+        margin-right: 4px; /* Add some spacing between checkbox and content */
+      }
+    </style>
+
     <link rel="manifest" href="/manifest.json" />
   </head>
 
@@ -47,67 +78,78 @@
           </li>
         </ul>
       </nav>
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-          <thead class="thead-light">
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email Address</th>
-              <th>Email Address 2</th>
-              <th>Business Phone</th>
-              <th>Mobile Phone</th>
-              <th>Other Phone</th>
-              <th>Primary Phone</th>
-              <th>Business Fax</th>
-              <th>Job Title</th>
-              <th>Company</th>
-              <th>Business Address</th>
-              <th>Business City</th>
-              <th>Business State</th>
-              <th>Business Zip</th>
-              <th>Business Country</th>
-              <th>Personal Website</th>
-              <th>Web Page</th>
-              <th>Birthday</th>
-              <th>Notes</th>
-              <th>Tag</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for contact in contacts %}
-            <tr>
-              <td>{{ contact.first_name }}</td>
-              <td>{{ contact.last_name }}</td>
-              <td>{{ contact.email_address }}</td>
-              <td>{{ contact.email_address_2 }}</td>
-              <td>{{ contact.business_phone }}</td>
-              <td>{{ contact.mobile_phone }}</td>
-              <td>{{ contact.other_phone }}</td>
-              <td>{{ contact.primary_phone }}</td>
-              <td>{{ contact.business_fax }}</td>
-              <td>{{ contact.job_title }}</td>
-              <td>{{ contact.company }}</td>
-              <td>{{ contact.business_address }}</td>
-              <td>{{ contact.business_city }}</td>
-              <td>{{ contact.business_state }}</td>
-              <td>{{ contact.business_zip }}</td>
-              <td>{{ contact.business_country }}</td>
-              <td>{{ contact.personal_website }}</td>
-              <td>{{ contact.web_page }}</td>
-              <td>{{ contact.birthday }}</td>
-              <td>{{ contact.notes }}</td>
-              <td>{{ contact.tag }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
+
+      <table id="index-table" class="table table-striped table-bordered mt-4">
+        <thead class="thead-light">
+          <tr>
+            <th></th>
+            <th><button class="btn btn-secondary">Tag</button></th>
+            <th><button class="btn btn-secondary">First Name</button></th>
+            <th><button class="btn btn-secondary">Last Name</button></th>
+            <th><button class="btn btn-secondary">Company</button></th>
+            <th><button class="btn btn-secondary">Department</button></th>
+            <th><button class="btn btn-secondary">Job Title</button></th>
+            <th><button class="btn btn-secondary">Email Address</button></th>
+            <th><button class="btn btn-secondary">Email Address 2</button></th>
+            <th><button class="btn btn-secondary">Business Phone</button></th>
+            <th><button class="btn btn-secondary">Mobile Phone</button></th>
+            <th><button class="btn btn-secondary">Business Fax</button></th>
+            <th><button class="btn btn-secondary">Birthday</button></th>
+            <th><button class="btn btn-secondary">Business Address</button></th>
+            <th><button class="btn btn-secondary">Business City</button></th>
+            <th><button class="btn btn-secondary">Business State</button></th>
+            <th><button class="btn btn-secondary">Business Zip</button></th>
+            <th><button class="btn btn-secondary">Business Country</button></th>
+            <th><button class="btn btn-secondary">Web Page</button></th>
+            <th><button class="btn btn-secondary">Meet Date</button></th>
+            <th><button class="btn btn-secondary">Notes</button></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for contact in contacts %}
+          <tr>
+            <td><input type="checkbox" name="contact_id" value="{{ contact.id }}" class="contact-id-input" /></td>
+            <input type="hidden" class="contact-id-input" value="{{ contact.id }}" />
+            <td>{{ contact.tag }}</td>
+            <td>{{ contact.first_name }}</td>
+            <td>{{ contact.last_name }}</td>
+            <td>{{ contact.company }}</td>
+            <td>{{ contact.department }}</td>
+            <td>{{ contact.job_title }}</td>
+            <td>{{ contact.email_address }}</td>
+            <td>{{ contact.email_address_2 }}</td>
+            <td>{{ contact.business_phone }}</td>
+            <td>{{ contact.mobile_phone }}</td>
+            <td>{{ contact.business_fax }}</td>
+            <td>{{ contact.birthday }}</td>
+            <td>{{ contact.business_address }}</td>
+            <td>{{ contact.business_city }}</td>
+            <td>{{ contact.business_state }}</td>
+            <td>{{ contact.business_zip }}</td>
+            <td>{{ contact.business_country }}</td>
+            <td>{{ contact.web_page }}</td>
+            <td>{{ contact.meet_date }}</td>
+            <td>{{ contact.notes }}</td>
+            <td>
+              <a
+                href="{{ url_for('edit', contact_id=contact.id) }}"
+                class="btn btn-primary"
+                >Edit</a
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
     <!-- Add the Bootstrap and jQuery scripts at the end of the body -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/cnchar/cnchar.min.js"></script>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
+    <script src="{{ url_for('static', filename='sort.js') }}"></script>
   </body>
 </html>
