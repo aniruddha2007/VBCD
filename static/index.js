@@ -140,7 +140,6 @@ function downloadSelectedContacts() {
 }
 
 //delete selected contacts
-
 function deleteSelectedContacts() {
     var table = document.getElementById("index-table");
     var rows = table.rows;
@@ -152,38 +151,30 @@ function deleteSelectedContacts() {
 
         if (checkbox.checked) {
             // Get the contact ID from the corresponding row
-            var contactId = rows[i].querySelector('.contact-id-input').value;
+            var contactId = rows[i].dataset.contactId;
+
             selectedContactIds.push(contactId);
         }
     }
 
-    // Check if any contacts are selected
-    if (selectedContactIds.length === 0) {
-        alert('Please select contacts to delete.');
-        return;
-    }
-
-    // Loop through the selected contact IDs and initiate the deletion
-    selectedContactIds.forEach(function (contactId) {
-        var rowToRemove = document.querySelector('[data-contact-id="' + contactId + '"]');
-
-        if (rowToRemove) {
-            // Remove the deleted row from the table
-            var tableRow = rowToRemove.parentNode.parentNode;
-            tableRow.parentNode.removeChild(tableRow);
+    // Make an AJAX request to the Flask route to delete selected contacts
+    $.ajax({
+        type: 'DELETE',
+        url: '/delete_selected_contacts_js',
+        contentType: 'application/json',
+        data: JSON.stringify({ 'selected_contact_ids': selectedContactIds }),
+        success: function (data) {
+            console.log(data.message);
+            // You may want to update the UI or take additional actions after successful deletion
+        },
+        error: function (error) {
+            console.error('Error:', error);
         }
-        
-        var xhr = new XMLHttpRequest();
-        xhr.open("DELETE", "/delete_contact/" + contactId, true);
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                // Optionally handle a successful deletion on the server
-            }
-        };
-        xhr.send();
     });
+    
 }
+
+
 
 //buttons event listeners
 document.addEventListener('DOMContentLoaded', function () {

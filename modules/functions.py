@@ -26,6 +26,7 @@ csv_to_db_mapping = {
     "Primary Phone": "primary_phone",
     "Business Fax": "business_fax",
     "Job Title": "job_title",
+    "Department": "department",
     "Company": "company",
     "Business Street": "business_address",
     "Business City": "business_city",
@@ -49,14 +50,15 @@ csv_to_db_mapping_zh = {
     "全名": "first_name",
     "姓氏": "last_name",
     "電子郵件地址": "email_address",
-    "電子郵件 2 地址": "email_address_2",
+    "商務電子郵件2": "email_address_2",
     "商務電子郵件": "email_address",
     "商務電話": "business_phone",
     "行動電話": "mobile_phone",
-    "其他電話": "other_phone",
-    "主要電話": "primary_phone",
+    "其他電話": "mobile_phone",
+    "主要電話": "mobile_phone",
     "商務傳真": "business_fax",
     "職稱": "job_title",
+    "部門": "department",
     "公司": "company",
     "商務地址-(街/路)": "business_address",
     "商務地址-(市)": "business_city",
@@ -122,15 +124,16 @@ def load_csv_to_db(csv_file, use_chinese_mapping=False):
     is decoded using the detected encoding and then re-encoded as UTF-8 before being returned. If there
     is an error during the conversion, None is returned.
     """
+
 def detect_and_convert_encoding(content):
     result = chardet.detect(content)
     detected_encoding = result["encoding"]
 
     if detected_encoding.lower() != "utf-8":
         try:
-            content = content.decode(detected_encoding, errors="replace").encode(
-                "utf-8"
-            )
+            # Explicitly encode to UTF-8 using codecs
+            content = codecs.decode(content, detected_encoding, errors="replace")
+            content = content.encode("utf-8")
             return content
         except Exception as e:
             print(f"Error converting to UTF-8: {e}")
@@ -138,17 +141,6 @@ def detect_and_convert_encoding(content):
     else:
         return content
 
-
-    """
-    The `load_csv` function checks the encoding of a CSV file and converts it to UTF-8 if necessary,
-    returning the content of the file.
-    
-    :param file: The "file" parameter is the file object that represents the uploaded CSV file. It is
-    used to read the content of the file and check its encoding
-    :return: the content of the CSV file. If the file is already in UTF-8 encoding, it returns the
-    content as is. If the file is not in UTF-8 encoding, it converts the content to UTF-8 and then
-    returns it.
-    """
 def load_csv(file):
     # Check the encoding of the uploaded CSV file
     detected_encoding = check_csv_encoding(file)
@@ -166,15 +158,6 @@ def load_csv(file):
 
 
 def check_csv_encoding(file):
-    """
-    The function `check_csv_encoding` reads a portion of a CSV file to detect its encoding using the
-    `chardet` library, and then tries to decode the content using the detected encoding, falling back to
-    UTF-8 if decoding fails.
-    
-    :param file: The `file` parameter is a file object that represents the CSV file you want to check
-    the encoding for
-    :return: the detected encoding of the CSV file.
-    """
     # Reset the file position to the beginning
     file.seek(0)
 

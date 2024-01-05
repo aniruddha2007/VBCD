@@ -17,6 +17,8 @@ from modules.functions import (
     load_csv,
     init_db,
     login_required,
+    check_csv_encoding,
+    detect_and_convert_encoding,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -88,6 +90,35 @@ def upload():
             uploaded_file = request.files["csvFile"]
             use_chinese_mapping = "chineseCheckbox" in request.form
 
+            # Check if the uploaded file is a CSV file
+            if uploaded_file.filename.endswith('.csv'):
+                # Use BytesIO to read the content of the file
+                csv_content = BytesIO(uploaded_file.read())
+
+                # Convert to TextIOWrapper to handle Unicode BOM in CSV file
+                csv_file_wrapper = TextIOWrapper(csv_content, encoding="utf-8")
+
+                # Process and save the data to the database
+                load_csv_to_db(csv_file_wrapper, use_chinese_mapping)
+
+                # Commit changes to the database
+                db.session.commit()
+
+                flash("File uploaded successfully", "success")
+                return redirect("/")
+            else:
+                flash("Invalid file format. Please upload a CSV file.", "danger")
+
+        except Exception as e:
+            flash(f"Error uploading file: {str(e)}", "danger")
+
+    return render_template(f"{selected_language}/upload.html")
+    selected_language = select_language()
+    if request.method == "POST":
+        try:
+            uploaded_file = request.files["csvFile"]
+            use_chinese_mapping = "chineseCheckbox" in request.form
+
             # Use TextIOWrapper to handle Unicode BOM in CSV file
             csv_file_wrapper = TextIOWrapper(uploaded_file.stream, encoding="utf-8")
             load_csv_to_db(csv_file_wrapper, use_chinese_mapping)
@@ -115,20 +146,32 @@ def upload_convert_csv():
     selected_language = select_language()
     if request.method == "POST":
         uploaded_file = request.files["csvFileSecond"]
-        utf8_content = load_csv(uploaded_file)
+        detected_encoding = check_csv_encoding(uploaded_file)
 
-        # Use BytesIO to create a downloadable file
-        download_file = BytesIO()
-        download_file.write(utf8_content.getvalue())
-        download_file.seek(0)
+        if detected_encoding.lower() != "utf-8":
+            # Convert to UTF-8
+            uploaded_file.seek(0)
+            utf8_content = detect_and_convert_encoding(uploaded_file.read())
+        else:
+            # Already UTF-8, no need to convert
+            uploaded_file.seek(0)
+            utf8_content = uploaded_file.read()
 
-        # Provide the file for download
-        return send_file(
-            download_file,
-            mimetype="text/csv",
-            as_attachment=True,
-            download_name="converted_file.csv",
-        )
+        if utf8_content is not None:
+            # Use BytesIO to create a downloadable file
+            download_file = BytesIO(utf8_content)
+            download_file.seek(0)
+
+            # Provide the file for download
+            return send_file(
+                download_file,
+                mimetype="text/csv",
+                as_attachment=True,
+                download_name="converted_file.csv",
+            )
+        else:
+            flash("Error converting the file to UTF-8", "error")
+
     return render_template(f"{selected_language}/upload.html")
 
 
@@ -251,6 +294,7 @@ def edit(contact_id):
         "Business Phone": "business_phone",
         "Mobile Phone": "mobile_phone",
         "Business Fax": "business_fax",
+        "Department": "department",
         "Job Title": "job_title",
         "Company": "company",
         "Business Address": "business_address",
@@ -502,6 +546,56 @@ def delete_contact(contact_id):
     db.session.commit()
     return jsonify({'message': 'Contact deleted successfully'})
 
+@app.route('/delete_selected_contacts_js', methods=['DELETE'])
+@login_required
+def delete_selected_contacts_js():
+    data = request.get_json()
+    selected_contact_ids = data.get('selected_contact_ids', [])
+
+    for contact_id in selected_contact_ids:
+        contact = Contact.query.get(contact_id)
+        if contact:
+            db.session.delete(contact)
+
+    db.session.commit()
+    return jsonify({'message': 'Selected contacts deleted successfully'})
+
+
+@app.route('/generate_csv', methods=['POST'])
+def generate_csv():
+    # Your logic to get selected contact IDs
+    selected_contact_ids = request.json.get('selected_contact_ids', [])
+
+    # Fetch contacts based on selected IDs
+    selected_contacts = Contact.query.filter(Contact.id.in_(selected_contact_ids)).all()
+
+    # Create a CSV string
+    csv_content = generate_csv_content(selected_contacts)
+
+    return jsonify({'csv_content': csv_content})
+
+def generate_csv_content(contacts):
+    # Use StringIO to create an in-memory file-like object
+    csv_output = StringIO()
+    
+    # Create a CSV writer
+    csv_writer = csv.writer(csv_output)
+
+    # Write header
+    csv_writer.writerow(['Tag', 'First Name', 'Last Name', 'Company', 'Department', 'Job Title', 'E-mail Address', 'E-mail Address 2', ' Business Phone', 'Mobile Phone', 'Business Fax', 'Birthday', 'Business Address', 'Business City', 'Business State', 'Business Zip', 'Business Country', 'Web Page','Notes' ])  # Add more fields as needed
+
+    # Write data for all headers
+    for contact in contacts:
+        csv_writer.writerow([contact.tag, contact.first_name, contact.last_name, contact.company, contact.department, contact.job_title, contact.email_address, contact.email_address_2, contact.business_phone, contact.mobile_phone, contact.business_fax, contact.birthday, contact.business_address, contact.business_city, contact.business_state, contact.business_zip, contact.business_country, contact.web_page, contact.notes])  # Add all header fields here
+
+    # Get the CSV content as a string
+    csv_content = csv_output.getvalue()
+
+    # Close the StringIO buffer
+    csv_output.close()
+
+    return csv_content
+
 # The above code is running a Flask app. It first initializes the database by calling the `init_db()`
 # function. Then, it creates all the necessary database tables using the `db.create_all()` method
 # within a Flask application context. Finally, it runs the Flask app with debugging enabled
@@ -512,4 +606,4 @@ if __name__ == "__main__":
     init_db()
     with app.app_context():
         db.create_all()
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
