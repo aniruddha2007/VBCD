@@ -1,3 +1,4 @@
+#imports
 import csv
 from flask import request, session, redirect, url_for, flash
 from functools import wraps
@@ -8,7 +9,11 @@ from modules.contacts import Contact, db
 from io import BytesIO
 import sqlite3
 
-
+# The `csv_to_db_mapping` dictionary is a mapping of CSV headers to database columns. It is used to
+# map the headers of a CSV file to the corresponding columns in the database table when loading data
+# from the CSV file into the database. Each key in the dictionary represents a CSV header, and the
+# corresponding value represents the corresponding database column. This mapping allows for
+# flexibility in handling CSV files with different header names or structures.
 # mapping of CSV headers to database columns
 csv_to_db_mapping = {
     "First Name": "first_name",
@@ -21,6 +26,7 @@ csv_to_db_mapping = {
     "Primary Phone": "primary_phone",
     "Business Fax": "business_fax",
     "Job Title": "job_title",
+    "Department": "department",
     "Company": "company",
     "Business Street": "business_address",
     "Business City": "business_city",
@@ -33,20 +39,26 @@ csv_to_db_mapping = {
     "Notes": "notes",
 }
 
+# The `csv_to_db_mapping_zh` dictionary is a mapping of Chinese CSV headers to database columns. It is
+# used when loading data from a CSV file with Chinese headers into the database. Each key in the
+# dictionary represents a Chinese CSV header, and the corresponding value represents the corresponding
+# database column. This mapping allows for handling CSV files with Chinese headers and mapping them to
+# the correct columns in the database table.
 # mapping of CSV headers to database columns
 csv_to_db_mapping_zh = {
     "名字": "first_name",
     "全名": "first_name",
     "姓氏": "last_name",
     "電子郵件地址": "email_address",
-    "電子郵件 2 地址": "email_address_2",
+    "商務電子郵件2": "email_address_2",
     "商務電子郵件": "email_address",
     "商務電話": "business_phone",
     "行動電話": "mobile_phone",
-    "其他電話": "other_phone",
-    "主要電話": "primary_phone",
+    "其他電話": "mobile_phone",
+    "主要電話": "mobile_phone",
     "商務傳真": "business_fax",
     "職稱": "job_title",
+    "部門": "department",
     "公司": "company",
     "商務地址-(街/路)": "business_address",
     "商務地址-(市)": "business_city",
@@ -62,6 +74,16 @@ csv_to_db_mapping_zh = {
 
 
 def load_csv_to_db(csv_file, use_chinese_mapping=False):
+    """
+    The function `load_csv_to_db` loads data from a CSV file into a database, mapping the CSV columns to
+    the appropriate fields in the Contact class and filtering out any invalid keys.
+    
+    :param csv_file: The csv_file parameter is the file object of the CSV file that you want to load
+    into the database
+    :param use_chinese_mapping: A boolean parameter that determines whether to use a Chinese mapping for
+    the CSV file. If set to True, the function will use the `csv_to_db_mapping_zh` mapping. If set to
+    False (default), it will use the `csv_to_db_mapping` mapping, defaults to False (optional)
+    """
     csv_reader = csv.DictReader(csv_file)
 
     # Extract tag from the file name (modify this part according to your needs)
@@ -91,22 +113,33 @@ def load_csv_to_db(csv_file, use_chinese_mapping=False):
 
 
 # Function to detect and convert encoding
+    """
+    The function detects the encoding of a given content and converts it to UTF-8 if it is not already
+    in that encoding.
+    
+    :param content: The `content` parameter is the text or data that you want to detect and convert the
+    encoding for. It can be a string or bytes object
+    :return: the content after detecting and converting the encoding to UTF-8. If the detected encoding
+    is already UTF-8, the content is returned as is. If the detected encoding is not UTF-8, the content
+    is decoded using the detected encoding and then re-encoded as UTF-8 before being returned. If there
+    is an error during the conversion, None is returned.
+    """
+
 def detect_and_convert_encoding(content):
     result = chardet.detect(content)
     detected_encoding = result["encoding"]
 
     if detected_encoding.lower() != "utf-8":
         try:
-            content = content.decode(detected_encoding, errors="replace").encode(
-                "utf-8"
-            )
+            # Explicitly encode to UTF-8 using codecs
+            content = codecs.decode(content, detected_encoding, errors="replace")
+            content = content.encode("utf-8")
             return content
         except Exception as e:
             print(f"Error converting to UTF-8: {e}")
             return None
     else:
         return content
-
 
 def load_csv(file):
     # Check the encoding of the uploaded CSV file
@@ -205,21 +238,6 @@ def load_csv_to_db_DO_NOT_EDIT(csv_file, use_chinese_mapping=False):
             logging.error(f"Error adding contact: {e}, Data: {row}")
 
 
-# initializing the database for login and register
-def init_db():
-    with sqlite3.connect("login.db") as connection:
-        cursor = connection.cursor()
-        cursor.execute(
-            """
-                       CREATE TABLE IF NOT EXISTS users(
-                           id INTEGER PRIMARY KEY AUTOINCREMENT,
-                           username TEXT NOT NULL,
-                           password TEXT NOT NULL
-                           )
-                        """
-        )
-        connection.commit()
-
 
 # login required function
 def login_required(view):
@@ -232,3 +250,32 @@ def login_required(view):
             return redirect(url_for("login"))
 
     return wrapped_view
+
+# admin required function
+def admin_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if "username" in session and session.get('role') == 'admin':
+            return view(*args, **kwargs)
+        else:
+            flash("You need to be an admin to access this page")
+            return redirect(url_for("login"))
+
+    return wrapped_view
+
+#init User db
+def init_user_db():
+    with sqlite3.connect("login.db") as connection:
+        c = connection.cursor()
+        c.execute(
+            """
+                    CREATE TABLE IF NOT EXISTS users(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT NOT NULL,
+                        password TEXT NOT NULL,
+                         role TEXT NOT NULL
+                        )
+                     """
+              )
+    connection.commit()
+    connection.close()
