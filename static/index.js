@@ -1,7 +1,11 @@
-//update total count
+// Update total count
 function updateTotalCount() {
-    var totalCount = document.getElementById("index-table").rows.length - 1; // Subtract header row
-    document.getElementById("totalCount").innerText = `名片總數:${totalCount}`;
+    var table = document.getElementById("index-table");
+
+    if (table && table.rows) {
+        var totalCount = table.rows.length - 1; // Subtract header row
+        document.getElementById("totalCount").innerText = `名片總數:${totalCount}`;
+    }
 }
 
 //copy selected emails
@@ -13,7 +17,7 @@ function copySelectedEmails() {
     // Iterate through rows and check if the checkbox is selected
     for (var i = 1; i < rows.length; i++) {
         var checkbox = rows[i].getElementsByTagName("input")[0];
-        var emailCell = rows[i].getElementsByTagName("td")[7]; // Adjust index based on your table structure
+        var emailCell = rows[i].getElementsByTagName("td")[8]; // Adjust index based on your table structure
 
         if (checkbox.checked) {
             selectedEmails.push(emailCell.innerText.trim());

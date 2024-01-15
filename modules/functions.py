@@ -184,18 +184,6 @@ def check_csv_encoding(file):
 
 
 def convert_to_utf8(file, detected_encoding):
-    """
-    The function `convert_to_utf8` takes a file and a detected encoding as input, reads the content of
-    the file using the detected encoding, handles any decoding errors, and returns the content as a
-    BytesIO object encoded in UTF-8.
-    
-    :param file: The `file` parameter is the file object that you want to convert to UTF-8 encoding. It
-    should be opened in binary mode (`"rb"`)
-    :param detected_encoding: The parameter "detected_encoding" is the encoding that was detected for
-    the file content. It is the encoding that was used to read the content of the file before the
-    conversion to UTF-8
-    :return: a BytesIO object containing the content of the file encoded in UTF-8.
-    """
     # Reset the file position to the beginning
     file.seek(0)
 
@@ -215,17 +203,6 @@ def convert_to_utf8(file, detected_encoding):
 
 
 # DO NOT EDIT THIS FUNCTION
-    """
-    The function `load_csv_to_db_DO_NOT_EDIT` loads data from a CSV file into a database, using a
-    mapping to convert the CSV columns to database fields, and logs any errors encountered during the
-    process.
-    
-    :param csv_file: The `csv_file` parameter is the file object of the CSV file that you want to load
-    into the database. It should be opened in read mode and passed as an argument to the function
-    :param use_chinese_mapping: A boolean parameter that determines whether to use a Chinese mapping for
-    the CSV file. If set to True, the function will use the `csv_to_db_mapping_zh` mapping. If set to
-    False, it will use the `csv_to_db_mapping` mapping, defaults to False (optional)
-    """
 def load_csv_to_db_DO_NOT_EDIT(csv_file, use_chinese_mapping=False):
     # Set up basic logging configuration
     logging.basicConfig(level=logging.DEBUG)
@@ -261,34 +238,8 @@ def load_csv_to_db_DO_NOT_EDIT(csv_file, use_chinese_mapping=False):
             logging.error(f"Error adding contact: {e}, Data: {row}")
 
 
-# initializing the database for login and register
-    """
-    The function initializes a SQLite database for login and register functionality.
-    """
-def init_db():
-    with sqlite3.connect("login.db") as connection:
-        cursor = connection.cursor()
-        cursor.execute(
-            """
-                       CREATE TABLE IF NOT EXISTS users(
-                           id INTEGER PRIMARY KEY AUTOINCREMENT,
-                           username TEXT NOT NULL,
-                           password TEXT NOT NULL
-                           )
-                        """
-        )
-        connection.commit()
-
 
 # login required function
-    """
-    The `login_required` function is a decorator that checks if a user is logged in before allowing
-    access to a view function, and redirects to the login page if not.
-    
-    :param view: The `view` parameter is a function that represents the view or endpoint that requires
-    login. It is the function that will be executed if the user is logged in
-    :return: The function `wrapped_view` is being returned.
-    """
 def login_required(view):
     @wraps(view)
     def wrapped_view(*args, **kwargs):
@@ -299,3 +250,32 @@ def login_required(view):
             return redirect(url_for("login"))
 
     return wrapped_view
+
+# admin required function
+def admin_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if "username" in session and session.get('role') == 'admin':
+            return view(*args, **kwargs)
+        else:
+            flash("You need to be an admin to access this page")
+            return redirect(url_for("login"))
+
+    return wrapped_view
+
+#init User db
+def init_user_db():
+    with sqlite3.connect("login.db") as connection:
+        c = connection.cursor()
+        c.execute(
+            """
+                    CREATE TABLE IF NOT EXISTS users(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT NOT NULL,
+                        password TEXT NOT NULL,
+                         role TEXT NOT NULL
+                        )
+                     """
+              )
+    connection.commit()
+    connection.close()

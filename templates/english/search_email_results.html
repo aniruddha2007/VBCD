@@ -11,107 +11,48 @@
     <title>Email Search Results</title>
 
     <!-- Add the Bootstrap CSS link -->
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="manifest" href="/manifest.json" />
-    <style>
-      body {
-        font-family: "Arial", sans-serif;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 0;
-      }
-
-      h1 {
-        text-align: center;
-        color: #333;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        margin-bottom: 20px;
-      }
-
-      th,
-      td {
-        padding: 10px;
-        text-align: left;
-        border: 1px solid #ddd;
-      }
-
-      th {
-        background-color: #f2f2f2;
-      }
-
-      tr:nth-child(even) {
-        background-color: #f9f9f9;
-      }
-
-      tr:hover {
-        background-color: #d1d1d1;
-      }
-
-      nav {
-        text-align: center;
-        margin-top: 20px;
-      }
-
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      li {
-        display: inline-block;
-        margin-right: 10px;
-      }
-
-      a {
-        text-decoration: none;
-        color: #333;
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-      }
-
-      a:hover {
-        background-color: #ddd;
-      }
-    </style>
   </head>
 
   <body class="bg-light">
-    <nav class="text-center mt-4">
-      <ul class="list-inline">
-        <li class="list-inline-item">
-          <a href="{{ url_for('index') }}" class="btn btn-secondary">Home</a>
-        </li>
-        <li class="list-inline-item">
-          <a href="{{ url_for('search') }}" class="btn btn-secondary">Search</a>
-        </li>
-        <li class="list-inline-item">
-          <a href="{{ url_for('upload') }}" class="btn btn-secondary">Upload</a>
-        </li>
-        <li class="list-inline-item">
-          <a
-            href="{{ url_for('select_contact_to_edit') }}"
-            class="btn btn-secondary"
-            >Edit</a
-          >
-        </li>
-        <li class="list-inline-item">
-          <a
-            href="{{ url_for('select_contact_to_delete') }}"
-            class="btn btn-secondary"
-            >Delete</a
-          >
-        </li>
-      </ul>
+    <nav class="navbar navbar-expand-lg bg-light" data-bs-theme="light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">VBCD</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="{{ url_for('index') }}">Home
+                <span class="visually-hidden">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('search') }}">Search</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('search_email') }}">Email Search</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('upload') }}">Upload</a>
+            </li>
+            {% if session['role'] == 'admin' %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('select_contact_to_edit') }}">Edit</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('select_contact_to_delete') }}">Delete</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+            </li>
+
+          </ul>
+        </div>
+      </div>
     </nav>
     <div class="container">
       <h1 class="text-center">Contact Search Results for "{{ query }}"</h1>
